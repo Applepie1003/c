@@ -2,141 +2,74 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class NewBehaviourScript : MonoBehaviour 
 {
+    public float maxSpeed;
+    public float jumpPower;
+    Rigidbody2D rigid;
+    SpriteRenderer spriteRenderer;
+    Animator anim;
+    void Awake()
+    {
+        rigid = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+    }
 
-    void Start()
-    { 
-            Debug.Log("Hello unity!");
+    void Update()
+    //1ì´ˆì— 60ë²ˆ
+    //ë‹¨ë°œì ì¸ ì…ë ¥ì€ Update
+    {
+        //Jump
+        if(Input.GetButtonDown("Jump") && !anim.GetBool("isjumping")){
+          rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+          anim.SetBool("isjumping", true);      
+        }
+        
+        //Stop Speed
+        if (Input.GetButtonDown("Horizontal")) {
+            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
+        }
 
-            //1. º¯¼ö
-            int level = 5;
-            //int : Á¤¼öÇü µ¥ÀÌÅÍ
-            float strength = 15.5f;
-            //float : ¼ıÀÚÇü µ¥ÀÌÅÍ
-            string playerName = "¿Õ°¨ÀÚ";
-            //string: ¹®ÀÚ¿­ µ¥ÀÌÅÍ
-            bool isFullLevel = false;
-            //bool ³í¸®Çü µ¥ÀÌÅÍ
+        //Direction Sprite
+        if(Input.GetButton("Horizontal"))
+            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        
 
-            //2. ±×·ìÇü º¯¼ö
-            string[] monster = { "½½¶óÀÓ", "»ç¸·¹ì", "¾Ç¸¶" };
-            int exp = 1500;
+        //Animation
+        if (Mathf.Abs(rigid.velocity.x) < 0.3)
+            anim.SetBool("isWalking", false);
+        else 
+            anim.SetBool("isWalking", true);
+    }
 
-            exp = 1500 + 320;
-            exp = exp - 10;
-            level = exp / 300;
-            strength = level * 3.1f;
+    void FixedUpdate()
+    //1ì´ˆì— 40ë²ˆ 
+    {
+        //Move Speed
+        float h = Input.GetAxisRaw("Horizontal");
+        rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
 
-            Debug.Log("¿ë»çÀÇ ÃÑ °æÇèÄ¡´Â?");
-            Debug.Log(exp);
-            Debug.Log("¿ë»çÀÇ ·¹º§Àº?");
-            Debug.Log(level);
-            Debug.Log("¿ë»çÀÇ ÈûÀº?");
-            Debug.Log(strength);
+        //Max Speed
+         if (rigid.velocity.x > maxSpeed)// Right Max Speed
+            rigid.velocity = new Vector2(maxSpeed, rigid.velocity.y);
+        else if (rigid.velocity.x < maxSpeed * (-1))// Left Max Speed
+            rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
 
-            //³ª¸ÓÁö ¿¬»êÀÚ
-            int nextexp = 300 - (exp % 300);
-            Debug.Log("´ÙÀ½ ·¹º§±îÁö ³²Àº °æÇèÄ¡´Â?");
-            Debug.Log(nextexp);
+        //Lamding platform
+        if(rigid.velocity.y < 0) {
+        Debug.DrawRay(rigid.position, Vector3.down, new Color(0, 1, 0));
+        RaycastHit2D rayHit = Physics2D.Raycast(rigid.position, Vector3.down, 1, LayerMask.GetMask("platfrom"));
 
-            string title = "Àü¼³ÀÇ";
-            Debug.Log("¿ë»çÀÇ ÀÌ¸§Àº?");
-            Debug.Log(title + " " + playerName);
+        if(rayHit.collider != null) {
+            if(rayHit.distance < 0.5f)
+            anim.SetBool("isjumping", false);ã…‡
+        }
+        
 
-            int fullLevel = 99;
-            isFullLevel = level == fullLevel;
-            Debug.Log("¿ë»ç´Â ¸¸·¾ÀÔ´Ï±î?" + isFullLevel);
-
-            bool isEndTutorial = level > 10;
-            Debug.Log("Æ©Åä¸®¾óÀÌ ³¡³­ ¿ë»çÀÎ°¡?" + isEndTutorial);
-            // >= ÀÌ»ó, <= ÀÌÇÏ, > ÃÊ°ú, < ¹Ì¸¸
-
-            int health = 55;
-            int mana = 25;
-            //bool isBadCondition = health <= 50 && mana <= 20;
-            // &&(and): µÎ °ªÀÌ ¸ğµÎ true ÀÏ‹š¸¸ true Ãâ·Â
-            bool isBadCondition = health <= 50 || mana <= 20;
-            // ||(or): µÎ °ª Áß¿¡¼­ ÇÏ³ª¸¸ true ÀÌ¸é true Ãâ·Â
-
-            Debug.Log("¿ë»çÀÇ »óÅÂ°¡ ³ª»Ş´Ï±î?" + isBadCondition);
-
-            string condition = isBadCondition ? "³ª»İ" : "ÁÁÀ½";
-            Debug.Log("¿ë»çÀÇ »óÅÂ°¡ ³ª»Ş´Ï±î?" + condition);
-            //? A: B: true ÀÏ ¶§ A, falseÀÏ ¶§ B Ãâ·Â
-
-            //4.Å°¿öµå
-            //int float string bool new
-            //º¯¼ö¸íÀ¸·Î »ç¿ë ÇÒ ¼ö ¾ø´Ù
-
-            //5.Á¶°Ç¹®
-            //if: Á¶°ÇÀÌ true ÀÏ ¶§, ·ÎÁ÷ ½ÇÇà
-            /* if(Á¶°Ç) {
-                ·ÎÁ÷
-            } */
-            if (condition == "³ª»İ")
-            {
-                Debug.Log("ÇÃ·¹ÀÌ¾î »óÅÂ°¡ ³ª»Ú´Ï ¾ÆÀÌÅÛÀ» »ç¿ëÇÏ¼¼¿ä.");
-            }
-            // else: ¾ÕÀÇ if°¡ ½ÇÇàµÇÁö ¾ÊÀ¸¸é ½ÇÇà
-            else
-            {
-                Debug.Log("ÇÃ·¹ÀÌ¾î »óÅÂ°¡ ÁÁ½À´Ï´Ù.");
-            }
-
-            //switch, case: º¯¼öÀÇ °ª¿¡ µû¶ó ·ÎÁ÷ ½ÇÇà
+        }
+    }
 
 
-
-
-            switch (monster[1])
-            {
-                case "½½¶óÀÓ":
-                case "»ç¸·¹ì":
-                    Debug.Log("¼ÒÇü ¸ó½ºÅÍ ÃâÇö");
-                    break;
-                case "¾Ç¸¶":
-                    Debug.Log("ÁßÇü ¸ó½ºÅÍ ÃâÇö");
-                    break;
-                case "°ñ·½":
-                    Debug.Log("´ëÇü ¸ó½ºÅÍ ÃâÇö");
-                    break;
-                default:
-                    Debug.Log("??? ¸ó½ºÅÍ°¡ ÃâÇö!");
-                    break;
-
-            }
-
-            //6. ¹İº¹¹®
-
-            /* while (Á¶°Ç) {
-                ·ÎÁ÷
-            } */
-
-            while (health > 0)
-            {
-                health--;
-                if (health > 0)
-                    Debug.Log("µ¶ µ¥¹ÌÁö¸¦ ÀÔ¾ú½À´Ï´Ù." + health);
-                else
-                    Debug.Log("»ç¸ÁÇÏ¿´½À´Ï´Ù.");
-                if (health == 10)
-                {
-                    Debug.Log("ÇØµ¶Á¦¸¦ »ç¿ëÇÕ´Ï´Ù.");
-                    break;
-                }
-
-            }
-            for (int count = 0; count < 10; count++)
-            {
-                Debug.Log("ºØ´ë¿À Ä¡·á Áß..." + health);
-            }
-
-            // ±×·ìÇüº¯¼ö ±æÀÌ : Length(¹è¿­), Count(¸®½ºÆ®)
-            for (int index = 0; index < monster.Length; index++)
-            {
-                Debug.Log("ÀÌ Áö¿ª¿¡ ÀÖ´Â ¸ó½ºÅÍ : " + monster[index]);
-            }
-     }
-    
 }
+
