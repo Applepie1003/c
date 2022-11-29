@@ -63,7 +63,7 @@ public class NewBehaviourScript : MonoBehaviour
 
         if(rayHit.collider != null) {
             if(rayHit.distance < 0.5f)
-            anim.SetBool("isjumping", false);ㅇ
+            anim.SetBool("isjumping", false);
         }
         
 
