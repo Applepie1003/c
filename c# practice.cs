@@ -18,7 +18,7 @@ public class NewBehaviourScript : MonoBehaviour
         bool isFullLevel = false;
         //bool 논리형 데이터
         
-         //2. 그룹형 변수
+         //2. 그룹형 변수 : 변수들을 묶은 하나의 장소
         string[] monster = { "슬라임", "사막뱀", "악마"};
         int exp = 1500;
          
